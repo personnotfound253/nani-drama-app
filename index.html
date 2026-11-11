@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,29 +7,61 @@
 <title>Nani Drama App</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#111;color:white;font-family:Arial}
-header{padding:18px;text-align:center;background:#1d1d1d;color:#ff477e;font-size:25px;font-weight:bold}
-.feed{height:75vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
-.video{background:#242424;border-radius:18px;padding:35px;width:100%;max-width:400px}
-.video h2{color:#ff477e}
-nav{position:fixed;bottom:0;background:#222;width:100%;display:flex;justify-content:space-around;padding:18px}
-button{background:#ff477e;color:white;border:0;padding:12px 20px;border-radius:25px}
+body{margin:0;background:#101014;color:white;font-family:Arial,sans-serif}
+header{padding:18px;background:#1c1b24;color:#ff4c85;font-size:24px;font-weight:bold;text-align:center}
+nav{display:flex;justify-content:space-around;padding:15px;background:#201f28;position:sticky;top:0}
+nav a{color:white;text-decoration:none}
+.feed{padding:15px}
+.video{height:390px;background:linear-gradient(145deg,#54244c,#17172b);border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:24px;font-weight:bold;margin-bottom:12px}
+.actions{display:flex;justify-content:space-around;padding:12px;font-size:18px}
+button{background:#ff397b;color:white;border:0;padding:13px 20px;border-radius:25px;font-size:16px}
+.upload{padding:15px;text-align:center}
+input{display:none}
+small{color:#bbb}
 </style>
 </head>
 <body>
 <header>❤️ Nani Drama</header>
-<div class="feed">
-<div class="video">
-<h2>Welcome to Nani Drama App</h2>
-<p>Share your videos and enjoy amazing dramas!</p>
-<button onclick="alert('Video upload feature coming soon!')">＋ Upload Video</button>
-</div>
-</div>
 <nav>
-<span>🏠 Home</span>
-<span>🔍 Search</span>
-<span>➕ Upload</span>
-<span>👤 Profile</span>
+<a href="#">Home</a>
+<a href="#upload">Upload</a>
+<a href="#">Profile</a>
 </nav>
+<div class="feed">
+<div class="video">🎬<br>Nani Drama<br><small>Your video feed</small></div>
+<div class="actions">
+<button onclick="like(this)">❤️ Like</button>
+<button onclick="alert('Comments coming soon!')">💬 Comment</button>
+<button onclick="alert('Share Nani Drama App!')">↗ Share</button>
+</div>
+<div class="video">🌸<br>Welcome to Nani Drama</div>
+<div class="actions">
+<button onclick="like(this)">❤️ Like</button>
+<button onclick="alert('Comments coming soon!')">💬 Comment</button>
+<button onclick="alert('Share Nani Drama App!')">↗ Share</button>
+</div>
+</div>
+<div class="upload" id="upload">
+<h2>Upload Your Video</h2>
+<p>Maximum video length: 2 minutes</p>
+<label for="videoFile"><button>＋ Choose Video</button></label>
+<input type="file" id="videoFile" accept="video/*">
+<p id="status">Select a video to preview</p>
+</div>
+<script>
+function like(btn){
+btn.innerText=btn.innerText.includes('Liked')?'❤️ Like':'❤️ Liked';
+}
+document.getElementById('videoFile').onchange=function(){
+let f=this.files[0];
+if(f){
+if(f.size>100*1024*1024){
+document.getElementById('status').innerText='Video is too large';
+return;
+}
+document.getElementById('status').innerText='Selected: '+f.name+' (Duration will be checked in the full app)';
+}
+};
+</script>
 </body>
 </html>
