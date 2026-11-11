@@ -1,0 +1,19 @@
+
+{
+  "name": "Nani Drama App",
+  "short_name": "Nani Drama",
+  "description": "Watch, upload and share short drama videos up to 2 minutes.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#101014",
+  "theme_color": "#ff397b",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
