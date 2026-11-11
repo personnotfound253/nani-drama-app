@@ -4,66 +4,211 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#100d18">
+<meta name="description" content="Nani Drama - Watch, upload and share short drama videos.">
 <title>Nani Drama App</title>
-  <link rel="icon" type="image/png" href="icon.png">
-  <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="manifest" href="manifest.json">
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101014;color:white;font-family:Arial,sans-serif}
-header{padding:18px;background:#1c1b24;color:#ff4c85;font-size:24px;font-weight:bold;text-align:center}
-nav{display:flex;justify-content:space-around;padding:15px;background:#201f28;position:sticky;top:0}
-nav a{color:white;text-decoration:none}
-.feed{padding:15px}
-.video{height:390px;background:linear-gradient(145deg,#54244c,#17172b);border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:24px;font-weight:bold;margin-bottom:12px}
-.actions{display:flex;justify-content:space-around;padding:12px;font-size:18px}
-button{background:#ff397b;color:white;border:0;padding:13px 20px;border-radius:25px;font-size:16px}
-.upload{padding:15px;text-align:center}
-input{display:none}
-small{color:#bbb}
+body{margin:0;background:#100d18;color:white;font-family:Arial,sans-serif}
+header{height:65px;background:#191522;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:5;border-bottom:1px solid #30263a}
+.logo{font-size:23px;font-weight:bold;color:#ff4b91}
+.logo span{color:white}
+.top-btn{background:#30243a;border:0;color:white;padding:10px;border-radius:20px}
+main{max-width:600px;margin:auto;padding-bottom:85px}
+.page{display:none;padding:16px}
+.page.active{display:block}
+.video-card{background:#201a2a;border-radius:18px;overflow:hidden;margin:16px 0}
+.video-screen{height:490px;background:linear-gradient(145deg,#63265c,#17172d);display:flex;align-items:center;justify-content:center;position:relative;text-align:center}
+.video-screen video{width:100%;height:100%;object-fit:cover}
+.video-placeholder{font-size:25px;font-weight:bold;line-height:1.7}
+.video-info{padding:13px}
+.video-info h3{margin:0 0 8px}
+.video-info p{color:#c7bacd;margin:5px 0}
+.actions{display:flex;justify-content:space-around;padding:12px}
+.actions button{background:#30243a;color:white;border:0;padding:10px;border-radius:20px;font-size:15px}
+.actions button.liked{color:#ff4b91}
+h2{color:#ff72a8}
+.primary{background:#ff3984;color:white;border:0;padding:13px 20px;border-radius:25px;font-size:16px;font-weight:bold}
+.field{width:100%;padding:14px;background:#211b2b;color:white;border:1px solid #49364e;border-radius:12px;margin:10px 0}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#191522;display:flex;justify-content:space-around;padding:12px 4px;border-top:1px solid #30263a;z-index:10}
+.bottom button{background:none;border:0;color:#ddd;font-size:12px}
+.bottom button strong{display:block;font-size:21px;margin-bottom:4px}
+.bottom button.selected{color:#ff4b91}
+.upload-box{padding:25px;text-align:center;border:1px dashed #ff4b91;border-radius:18px;background:#201a2a}
+.profile-circle{width:85px;height:85px;border-radius:50%;background:#ff3984;display:grid;place-items:center;font-size:38px;margin:auto}
+small{color:#c9b8ce}
 </style>
 </head>
 <body>
-<header>❤️ Nani Drama</header>
-<nav>
-<a href="#">Home</a>
-<a href="#upload">Upload</a>
-<a href="#">Profile</a>
+<header>
+ <div class="logo">❤️ Nani <span>Drama</span></div>
+ <button class="top-btn" onclick="showPage('search')">🔍 Search</button>
+</header>
+
+<main>
+<section id="home" class="page active">
+ <h2>For You ❤️</h2>
+ <p><small>Discover amazing short dramas</small></p>
+
+ <div id="feed">
+  <div class="video-card">
+   <div class="video-screen">
+    <div class="video-placeholder">🎬<br>Nani Drama<br><small>Welcome to our community!</small></div>
+   </div>
+   <div class="video-info">
+    <h3>@NaniDramaOfficial</h3>
+    <p>Welcome to Nani Drama ❤️</p>
+    <small>#NaniDrama #Drama #Entertainment</small>
+   </div>
+   <div class="actions">
+    <button onclick="toggleLike(this)">❤️ Like</button>
+    <button onclick="comment()">💬 Comment</button>
+    <button onclick="shareApp()">↗ Share</button>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section id="upload" class="page">
+ <h2>⬆️ Upload Video</h2>
+ <div class="upload-box">
+  <h3>Share your drama ❤️</h3>
+  <p>Maximum duration: 2 minutes</p>
+  <input class="field" id="videoInput" type="file" accept="video/*">
+  <button class="primary" onclick="document.getElementById('videoInput').click()">Choose Video</button>
+  <p id="uploadStatus"><small>Select a video to preview it.</small></p>
+  <video id="preview" controls style="display:none;width:100%;border-radius:12px;margin-top:15px"></video>
+  <input class="field" id="caption" placeholder="Write a video caption...">
+  <button class="primary" onclick="publishVideo()">Publish Preview</button>
+  <p><small>Demo only: publishing adds the video to this device's current page, not to other users.</small></p>
+ </div>
+</section>
+
+<section id="search" class="page">
+ <h2>🔍 Search</h2>
+ <input class="field" id="searchInput" placeholder="Search videos or hashtags..." oninput="searchVideos()">
+ <p id="searchResult">Search Nani Drama videos</p>
+</section>
+
+<section id="profile" class="page">
+ <h2>My Profile</h2>
+ <div class="profile-circle">👤</div>
+ <h3 style="text-align:center">Nani Drama User</h3>
+ <p style="text-align:center;color:#c9b8ce">Welcome to Nani Drama ❤️</p>
+ <div style="display:flex;justify-content:space-around;text-align:center">
+  <div><h2 id="postCount">0</h2><small>Videos</small></div>
+  <div><h2>0</h2><small>Followers</small></div>
+  <div><h2>0</h2><small>Following</small></div>
+ </div>
+ <hr style="border-color:#49364e">
+ <p>🌸 Your Nani Drama profile</p>
+ <p>🌐 Language: Urdu / English</p>
+ <p>🌙 Theme: Dark</p>
+</section>
+</main>
+
+<nav class="bottom">
+ <button class="selected" onclick="showPage('home',this)"><strong>🏠</strong>Home</button>
+ <button onclick="showPage('search',this)"><strong>🔍</strong>Search</button>
+ <button onclick="showPage('upload',this)"><strong>➕</strong>Upload</button>
+ <button onclick="showPage('profile',this)"><strong>👤</strong>Profile</button>
 </nav>
-<div class="feed">
-<div class="video">🎬<br>Nani Drama<br><small>Your video feed</small></div>
-<div class="actions">
-<button onclick="like(this)">❤️ Like</button>
-<button onclick="alert('Comments coming soon!')">💬 Comment</button>
-<button onclick="alert('Share Nani Drama App!')">↗ Share</button>
-</div>
-<div class="video">🌸<br>Welcome to Nani Drama</div>
-<div class="actions">
-<button onclick="like(this)">❤️ Like</button>
-<button onclick="alert('Comments coming soon!')">💬 Comment</button>
-<button onclick="alert('Share Nani Drama App!')">↗ Share</button>
-</div>
-</div>
-<div class="upload" id="upload">
-<h2>Upload Your Video</h2>
-<p>Maximum video length: 2 minutes</p>
-<label for="videoFile"><button>＋ Choose Video</button></label>
-<input type="file" id="videoFile" accept="video/*">
-<p id="status">Select a video to preview</p>
-</div>
+
 <script>
-function like(btn){
-btn.innerText=btn.innerText.includes('Liked')?'❤️ Like':'❤️ Liked';
+let selectedFile=null;
+let localURL=null;
+let postCount=0;
+
+function showPage(id,btn){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('selected'));
+ if(btn)btn.classList.add('selected');
 }
-document.getElementById('videoFile').onchange=function(){
-let f=this.files[0];
-if(f){
-if(f.size>100*1024*1024){
-document.getElementById('status').innerText='Video is too large';
-return;
+
+function toggleLike(btn){
+ btn.classList.toggle('liked');
+ btn.textContent=btn.classList.contains('liked')?'❤️ Liked':'❤️ Like';
 }
-document.getElementById('status').innerText='Selected: '+f.name+' (Duration will be checked in the full app)';
+
+function comment(){
+ let message=prompt('Write your comment:');
+ if(message && message.trim()) alert('Comment preview: '+message);
 }
-};
+
+async function shareApp(){
+ if(navigator.share){
+  try{await navigator.share({title:'Nani Drama',text:'Watch Nani Drama!',url:location.href})}catch(e){}
+ }else{
+  alert('Share this app: '+location.href);
+ }
+}
+
+document.getElementById('videoInput').addEventListener('change',function(){
+ const file=this.files[0];
+ if(!file)return;
+ const video=document.getElementById('preview');
+ if(localURL)URL.revokeObjectURL(localURL);
+ localURL=URL.createObjectURL(file);
+ video.src=localURL;
+ video.style.display='block';
+ selectedFile=file;
+ video.onloadedmetadata=function(){
+  if(video.duration>120){
+   alert('Video must be 2 minutes or shorter.');
+   video.src='';
+   video.style.display='none';
+   selectedFile=null;
+   document.getElementById('uploadStatus').textContent='Please choose a shorter video.';
+  }else{
+   document.getElementById('uploadStatus').textContent='Video ready: '+file.name;
+  }
+ };
+});
+
+function publishVideo(){
+ if(!selectedFile){
+  alert('Please choose a video first.');
+  return;
+ }
+ const caption=document.getElementById('caption').value || 'My new video ❤️';
+ const card=document.createElement('div');
+ card.className='video-card';
+ const screen=document.createElement('div');
+ screen.className='video-screen';
+ const video=document.createElement('video');
+ video.controls=true;
+ video.src=localURL;
+ screen.appendChild(video);
+ const info=document.createElement('div');
+ info.className='video-info';
+ const title=document.createElement('h3');
+ title.textContent='@NaniDramaUser';
+ const desc=document.createElement('p');
+ desc.textContent=caption;
+ info.append(title,desc);
+ const actions=document.createElement('div');
+ actions.className='actions';
+ actions.innerHTML='<button onclick="toggleLike(this)">❤️ Like</button><button onclick="comment()">💬 Comment</button><button onclick="shareApp()">↗ Share</button>';
+ card.append(screen,info,actions);
+ document.getElementById('feed').prepend(card);
+ postCount++;
+ document.getElementById('postCount').textContent=postCount;
+ document.getElementById('caption').value='';
+ document.getElementById('uploadStatus').textContent='Preview added to your local feed.';
+ document.getElementById('preview').style.display='none';
+ selectedFile=null;
+ showPage('home',document.querySelector('.bottom button'));
+}
+
+function searchVideos(){
+ const q=document.getElementById('searchInput').value.toLowerCase();
+ document.getElementById('searchResult').textContent=
+ q?'Search term: '+q+'. Online video search will be available after backend setup.':'Search Nani Drama videos';
+}
 </script>
 </body>
-</html>
+  </html>
+  
