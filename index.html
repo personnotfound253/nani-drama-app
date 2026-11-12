@@ -1,0 +1,289 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#160d18">
+<title>Nani Drama App</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.png">
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#160d18;color:white;font-family:Arial,sans-serif}
+header{background:#29132d;color:#ff69b4;text-align:center;padding:20px;font-size:26px;font-weight:bold}
+main{max-width:520px;margin:auto;padding:15px}
+.panel{background:#291b30;padding:18px;border-radius:16px;margin:15px 0}
+h2{color:#ff69b4}
+input,textarea,button{width:100%;padding:13px;margin:8px 0;border:0;border-radius:10px;font-size:16px}
+input,textarea{background:#fff;color:#222}
+button{background:#ff4fa3;color:white;font-weight:bold}
+button:disabled{opacity:.5}
+video{width:100%;max-height:420px;background:#000;border-radius:12px}
+#app{display:none}
+#status,#uploadStatus{color:#ffb6d9;overflow-wrap:anywhere}
+</style>
+</head>
+
+<body>
+<header>💗 Nani Drama App</header>
+
+<main>
+
+<section id="login" class="panel">
+<h2>Welcome to Nani Drama</h2>
+<p>Phone number se login karein</p>
+
+<input id="phone" type="tel" placeholder="+923001234567">
+
+<div id="recaptcha-container"></div>
+
+<button id="sendBtn" onclick="sendOTP()">Send OTP</button>
+
+<input id="otp" type="text" inputmode="numeric" placeholder="Enter SMS OTP">
+
+<button id="verifyBtn" onclick="verifyOTP()">Verify OTP</button>
+
+<p id="status"></p>
+</section>
+
+<section id="app">
+
+<div class="panel">
+<h2>Welcome!</h2>
+<p id="userPhone"></p>
+<button onclick="logout()">Logout</button>
+</div>
+
+<div class="panel">
+<h2>Upload Video</h2>
+<p>Maximum duration: 2 minutes</p>
+
+<input id="videoFile" type="file" accept="video/*">
+
+<video id="preview" controls style="display:none"></video>
+
+<textarea id="caption" placeholder="Video caption likhein"></textarea>
+
+<button onclick="publishVideo()">Add Video Preview</button>
+
+<p id="uploadStatus"></p>
+</div>
+
+<div class="panel">
+<h2>Video Feed</h2>
+<div id="feed"></div>
+</div>
+
+</section>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBuepUgwz3YcgtCdTyJyCHulJje0E4rZfA",
+  authDomain: "nani-drama-app.firebaseapp.com",
+  projectId: "nani-drama-app",
+  storageBucket: "nani-drama-app.firebasestorage.app",
+  messagingSenderId: "694155885723",
+  appId: "1:694155885723:web:1e101594dda5248f14da3e",
+  measurementId: "G-XXDJ6939LV"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+
+let confirmationResult = null;
+let recaptchaVerifier = null;
+let selectedVideoURL = null;
+
+function showStatus(message){
+ document.getElementById("status").textContent=message;
+}
+
+async function sendOTP(){
+
+ const phone=document.getElementById("phone").value.trim();
+ const sendBtn=document.getElementById("sendBtn");
+
+ if(!/^\+[1-9]\d{7,14}$/.test(phone)){
+  showStatus("Sahi phone number country code ke sath likhein. Misal: +923001234567");
+  return;
+ }
+
+ try{
+
+  sendBtn.disabled=true;
+  showStatus("Security verification load ho rahi hai...");
+
+  if(!recaptchaVerifier){
+   recaptchaVerifier=new firebase.auth.RecaptchaVerifier(
+    "recaptcha-container",
+    {size:"normal"},
+    auth
+   );
+  }
+
+  await recaptchaVerifier.render();
+
+  showStatus("OTP bheja ja raha hai...");
+
+  confirmationResult=await auth.signInWithPhoneNumber(
+   phone,
+   recaptchaVerifier
+  );
+
+  showStatus("OTP SMS bhej diya gaya hai. Ab code enter karein.");
+
+ }catch(error){
+
+  showStatus("Error: "+error.code+" - "+error.message);
+
+  if(recaptchaVerifier){
+   recaptchaVerifier.clear();
+   recaptchaVerifier=null;
+  }
+
+ }finally{
+  sendBtn.disabled=false;
+ }
+}
+
+async function verifyOTP(){
+
+ const code=document.getElementById("otp").value.trim();
+
+ if(!confirmationResult){
+  showStatus("Pehle Send OTP dabayein.");
+  return;
+ }
+
+ if(!/^\d{6}$/.test(code)){
+  showStatus("6 digit OTP code likhein.");
+  return;
+ }
+
+ try{
+
+  document.getElementById("verifyBtn").disabled=true;
+  showStatus("OTP verify ho raha hai...");
+
+  await confirmationResult.confirm(code);
+
+  showStatus("Login successful!");
+
+ }catch(error){
+
+  showStatus("OTP Error: "+error.code+" - "+error.message);
+
+ }finally{
+  document.getElementById("verifyBtn").disabled=false;
+ }
+}
+
+auth.onAuthStateChanged(user=>{
+
+ if(user){
+
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="block";
+
+  document.getElementById("userPhone").textContent=
+   "Logged in: "+(user.phoneNumber || "User");
+
+ }else{
+
+  document.getElementById("login").style.display="block";
+  document.getElementById("app").style.display="none";
+
+ }
+
+});
+
+async function logout(){
+ await auth.signOut();
+}
+
+document.getElementById("videoFile").addEventListener("change",function(){
+
+ const file=this.files[0];
+ const preview=document.getElementById("preview");
+
+ if(selectedVideoURL){
+  URL.revokeObjectURL(selectedVideoURL);
+  selectedVideoURL=null;
+ }
+
+ if(!file)return;
+
+ if(!file.type.startsWith("video/")){
+  alert("Video file select karein.");
+  this.value="";
+  return;
+ }
+
+ const url=URL.createObjectURL(file);
+
+ preview.src=url;
+ preview.style.display="block";
+
+ preview.onloadedmetadata=()=>{
+
+  if(preview.duration>120){
+
+   alert("Video 2 minutes se lambi nahi ho sakti.");
+
+   preview.removeAttribute("src");
+   preview.style.display="none";
+
+   URL.revokeObjectURL(url);
+   this.value="";
+
+  }else{
+
+   selectedVideoURL=url;
+
+  }
+
+ };
+
+});
+
+function publishVideo(){
+
+ const file=document.getElementById("videoFile").files[0];
+ const caption=document.getElementById("caption").value.trim();
+
+ if(!file || !selectedVideoURL){
+  document.getElementById("uploadStatus").textContent=
+   "Pehle video select karein.";
+  return;
+ }
+
+ const item=document.createElement("div");
+ item.className="panel";
+
+ const video=document.createElement("video");
+ video.controls=true;
+ video.src=selectedVideoURL;
+
+ const text=document.createElement("p");
+ text.textContent=caption;
+
+ item.appendChild(video);
+ item.appendChild(text);
+
+ document.getElementById("feed").prepend(item);
+
+ document.getElementById("uploadStatus").textContent=
+  "Video ka local preview add ho gaya. Online upload abhi available nahi hai.";
+
+}
+</script>
+</body>
+  </html>
+  
