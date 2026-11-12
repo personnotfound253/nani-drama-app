@@ -1,0 +1,20 @@
+
+{
+  "name": "Nani Drama App",
+  "short_name": "Nani Drama",
+  "description": "Nani Drama is a social video sharing app where users can watch, upload and share short videos up to 2 minutes.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#160d18",
+  "theme_color": "#ff4fa3",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
